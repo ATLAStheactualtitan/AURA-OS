@@ -129,11 +129,15 @@ class GestureRecognizer:
             return
         cur = self.cur
         ext = (x - self.anchor[0]) * cur.dx + (y - self.anchor[1]) * cur.dy
-        if ext > self.peak_ext:
-            self.peak, self.peak_ext = (x, y), ext
-            return
         wx, wy = x - self.peak[0], y - self.peak[1]
         dist = math.hypot(wx, wy)
+        # Still travelling along the segment: the peak follows. Judged by heading from the peak, not by
+        # projection, otherwise moving straight right after a diagonal keeps dragging the peak along.
+        limit = 30.0 if cur in EIGHT_WAY[4:] else 40.0
+        if dist == 0 or (wx * cur.dx + wy * cur.dy) / dist >= math.cos(math.radians(limit)):
+            if ext > self.peak_ext:
+                self.peak, self.peak_ext = (x, y), ext
+            return
         if dist < c.turn_px:
             return
         nd = classify(wx, wy, c.directions, c.hysteresis_deg)

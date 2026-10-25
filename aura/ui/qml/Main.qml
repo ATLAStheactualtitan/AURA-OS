@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Shapes
 
 Window {
     id: root
@@ -9,11 +10,11 @@ Window {
     visibility: fullscreenMode ? Window.FullScreen : Window.Windowed
     title: "AURA"
     color: Theme.bg
-    palette.button: "#3a3a3c"
+    palette.button: "#2a2840"
     palette.buttonText: Theme.text
-    palette.window: "#1c1c1e"
+    palette.window: "#13121f"
     palette.windowText: Theme.text
-    palette.base: "#2c2c2e"
+    palette.base: "#1d1b2e"
     palette.text: Theme.text
     palette.highlight: Theme.accent
     palette.highlightedText: "#0b0e14"
@@ -22,11 +23,11 @@ Window {
     property int zTop: 10
     property bool launcherOpen: false
     readonly property var appDefs: [
-        { id: "music", title: "Music", glyph: "♪", tint: "#ff375f" },
-        { id: "files", title: "Files", glyph: "▣", tint: "#0a84ff" },
-        { id: "editor", title: "Editor", glyph: "✎", tint: "#ff9f0a" },
-        { id: "lab", title: "Gesture Lab", glyph: "◎", tint: "#bf5af2" },
-        { id: "settings", title: "Settings", glyph: "⚙", tint: "#98989d" }
+        { id: "music", title: "Music", glyph: "♪", tint: "#ff5d8f" },
+        { id: "files", title: "Files", glyph: "▣", tint: "#5b9bff" },
+        { id: "editor", title: "Editor", glyph: "✎", tint: "#ffa35c" },
+        { id: "lab", title: "Gesture Lab", glyph: "◎", tint: "#b77bff" },
+        { id: "settings", title: "Settings", glyph: "⚙", tint: "#8f8ca8" }
     ]
     function win(id) { return ({ music: musicWin, files: filesWin, editor: editorWin, lab: labWin, settings: settingsWin })[id] }
     function openApp(id) {
@@ -34,6 +35,25 @@ Window {
         w.open(); raise(w); launcherOpen = false
     }
     function raise(w) { zTop += 1; w.z = zTop }
+
+    // Window control gesture (right-drag on a window's control): up maximise, down minimise, right close.
+    property var wg: null
+    function wgAction(dx, dy) {
+        if (Math.hypot(dx, dy) < 28) return ""
+        if (Math.abs(dy) > Math.abs(dx)) return dy < 0 ? "maximize" : "minimize"
+        return dx > 0 ? "close" : ""
+    }
+    function wgLabel(a) {
+        return a === "maximize" ? "↑  Maximise" : a === "minimize" ? "↓  Minimise" : a === "close" ? "→  Close" : "↑ maximise   ↓ minimise   → close"
+    }
+    function wgFinish() {
+        var g = wg; wg = null
+        if (!g || !g.act) return
+        var w = win(g.app); if (!w) return
+        if (g.act === "maximize") w.toggleMaximize()
+        else if (g.act === "minimize") w.minimize()
+        else w.close()
+    }
 
     // Resolve the gesture context from whatever item is under the pointer (deepest item that declares one).
     function contextAt(x, y) {
@@ -78,24 +98,58 @@ Window {
         property string auraType: "desktop"
         property var auraData: ({})
 
-        Rectangle {
+        Rectangle { anchors.fill: parent; color: Theme.bg }
+        Shape {
             anchors.fill: parent
-            gradient: Gradient {
-                orientation: Gradient.Vertical
-                GradientStop { position: 0; color: "#1b1446" }
-                GradientStop { position: 0.5; color: "#3b1d6e" }
-                GradientStop { position: 1; color: "#0f2a5c" }
+            ShapePath {
+                strokeWidth: -1
+                fillGradient: RadialGradient {
+                    centerX: root.width * 0.82; centerY: root.height * 0.08; centerRadius: root.height * 0.95
+                    focalX: centerX; focalY: centerY
+                    GradientStop { position: 0; color: "#908b5cff" }
+                    GradientStop { position: 1; color: "#008b5cff" }
+                }
+                startX: 0; startY: 0
+                PathLine { x: root.width; y: 0 }
+                PathLine { x: root.width; y: root.height }
+                PathLine { x: 0; y: root.height }
+                PathLine { x: 0; y: 0 }
             }
-            Rectangle { x: parent.width * 0.55; y: -parent.height * 0.2; width: parent.height * 1.1; height: width; radius: width / 2; color: "#ff6ac1"; opacity: 0.12 }
-            Rectangle { x: -parent.width * 0.1; y: parent.height * 0.45; width: parent.height * 0.9; height: width; radius: width / 2; color: "#64d2ff"; opacity: 0.1 }
+            ShapePath {
+                strokeWidth: -1
+                fillGradient: RadialGradient {
+                    centerX: root.width * 0.12; centerY: root.height * 0.92; centerRadius: root.height * 0.9
+                    focalX: centerX; focalY: centerY
+                    GradientStop { position: 0; color: "#7035d6c4" }
+                    GradientStop { position: 1; color: "#0035d6c4" }
+                }
+                startX: 0; startY: 0
+                PathLine { x: root.width; y: 0 }
+                PathLine { x: root.width; y: root.height }
+                PathLine { x: 0; y: root.height }
+                PathLine { x: 0; y: 0 }
+            }
+            ShapePath {
+                strokeWidth: -1
+                fillGradient: RadialGradient {
+                    centerX: root.width * 0.35; centerY: root.height * 0.3; centerRadius: root.height * 0.7
+                    focalX: centerX; focalY: centerY
+                    GradientStop { position: 0; color: "#40ff5d8f" }
+                    GradientStop { position: 1; color: "#00ff5d8f" }
+                }
+                startX: 0; startY: 0
+                PathLine { x: root.width; y: 0 }
+                PathLine { x: root.width; y: root.height }
+                PathLine { x: 0; y: root.height }
+                PathLine { x: 0; y: 0 }
+            }
         }
-        Text { anchors.centerIn: parent; text: "AURA"; font.pixelSize: 120; font.weight: Font.Thin; font.letterSpacing: 24; color: "#ffffff"; opacity: 0.04; font.family: Theme.family }
-        Text { anchors.horizontalCenter: parent.horizontalCenter; y: parent.height / 2 + 70; color: Theme.dim; opacity: 0.5; font.pixelSize: 12; font.family: Theme.family
-               text: "Right-click the desktop, hold, and drag.  ←  ↑  →  ↓" }
+        Text { anchors.horizontalCenter: parent.horizontalCenter; y: parent.height / 2 + 10; color: Theme.dim; opacity: 0.55; font.pixelSize: 13; font.family: Theme.family
+               text: "Right-click the desktop, hold, and drag  ·  ←  ↑  →  ↓" }
 
         // Desktop icons
         Column {
-            x: 28; y: 28; spacing: 14
+            x: 28; y: Theme.menuBar + 22; spacing: 14
             Repeater {
                 model: root.appDefs
                 delegate: Item {
@@ -103,13 +157,38 @@ Window {
                     required property var modelData
                     property string auraType: "app_icon"
                     property var auraData: ({ app: modelData.id, title: modelData.title })
-                    width: 84; height: 88
-                    Rectangle { id: tile; width: 58; height: 58; radius: 13; anchors.horizontalCenter: parent.horizontalCenter
-                        color: modelData.tint; opacity: im.containsMouse ? 1 : 0.92; border.width: 0
-                        Text { anchors.centerIn: parent; text: modelData.glyph; color: "#ffffff"; font.pixelSize: 28 } }
-                    Text { anchors.top: tile.bottom; anchors.topMargin: 6; anchors.horizontalCenter: parent.horizontalCenter; text: modelData.title; color: Theme.text; font.pixelSize: 12; font.family: Theme.family }
+                    width: 84; height: 90
+                    Rectangle { id: tile; width: 56; height: 56; radius: 16; anchors.horizontalCenter: parent.horizontalCenter
+                        gradient: Gradient { GradientStop { position: 0; color: Qt.lighter(modelData.tint, 1.25) } GradientStop { position: 1; color: modelData.tint } }
+                        scale: im.containsMouse ? 1.06 : 1
+                        Behavior on scale { NumberAnimation { duration: 120 } }
+                        Text { anchors.centerIn: parent; text: modelData.glyph; color: "#ffffff"; font.pixelSize: 26 } }
+                    Text { anchors.top: tile.bottom; anchors.topMargin: 7; anchors.horizontalCenter: parent.horizontalCenter; text: modelData.title; color: Theme.text; font.pixelSize: 12; font.family: Theme.family }
                     MouseArea { id: im; anchors.fill: parent; hoverEnabled: true; acceptedButtons: Qt.LeftButton; onDoubleClicked: root.openApp(modelData.id) }
                 }
+            }
+        }
+
+        // Menu bar
+        Rectangle {
+            id: menuBar
+            z: 100001
+            width: parent.width; height: Theme.menuBar; color: Qt.rgba(0.05, 0.045, 0.1, 0.55)
+            property string auraType: "desktop"
+            Rectangle { width: parent.width; height: 1; anchors.bottom: parent.bottom; color: Qt.rgba(1, 1, 1, 0.06) }
+            Row {
+                x: 18; anchors.verticalCenter: parent.verticalCenter; spacing: 10
+                Rectangle { width: 16; height: 16; radius: 5; anchors.verticalCenter: parent.verticalCenter
+                    gradient: Gradient { orientation: Gradient.Horizontal; GradientStop { position: 0; color: "#8b7bff" } GradientStop { position: 1; color: "#3de0b0" } } }
+                Text { text: "Aura"; color: Theme.text; font.pixelSize: 13; font.weight: Font.Bold; font.family: Theme.family; anchors.verticalCenter: parent.verticalCenter }
+            }
+            Row {
+                anchors.right: parent.right; anchors.rightMargin: 18; anchors.verticalCenter: parent.verticalCenter; spacing: 18
+                Text { font.pixelSize: 12; font.family: Theme.family; color: Theme.dim; anchors.verticalCenter: parent.verticalCenter
+                       text: "Guidance L" + aura.guidanceInfo.level + " · " + aura.guidanceInfo.name }
+                Text { id: clock; anchors.verticalCenter: parent.verticalCenter; font.pixelSize: 13; font.weight: Font.Medium; color: Theme.text; font.family: Theme.family
+                       text: Qt.formatDateTime(new Date(), "ddd d MMM  hh:mm")
+                       Timer { interval: 15000; running: true; repeat: true; onTriggered: clock.text = Qt.formatDateTime(new Date(), "ddd d MMM  hh:mm") } }
             }
         }
 
@@ -128,30 +207,29 @@ Window {
         // Panel
         Rectangle {
             id: panel
-            anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 14
+            anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 18
             z: 100000
-            width: panelRow.implicitWidth + 28; height: 64; radius: 22; color: Theme.glass; border.color: Qt.rgba(1, 1, 1, 0.18)
+            width: panelRow.implicitWidth + 28; height: 72; radius: 26; color: Theme.glass; border.color: Qt.rgba(1, 1, 1, 0.14)
             property string auraType: "desktop"
             Row {
-                id: panelRow; anchors.centerIn: parent; spacing: 10
-                Rectangle { width: 44; height: 44; radius: 11; color: root.launcherOpen ? Theme.accent : Qt.rgba(1, 1, 1, 0.14)
-                    Text { anchors.centerIn: parent; text: "◈"; color: root.launcherOpen ? "#0b0e14" : Theme.text; font.pixelSize: 20 }
+                id: panelRow; anchors.centerIn: parent; spacing: 12
+                Rectangle { width: 48; height: 48; radius: 14; color: root.launcherOpen ? Theme.accent : Qt.rgba(1, 1, 1, 0.1)
+                    Text { anchors.centerIn: parent; text: "◈"; color: Theme.text; font.pixelSize: 22 }
                     MouseArea { anchors.fill: parent; acceptedButtons: Qt.LeftButton; onClicked: { root.launcherOpen = !root.launcherOpen; if (root.launcherOpen) launchSearch.forceActiveFocus() } } }
+                Rectangle { width: 1; height: 32; color: Theme.border; anchors.verticalCenter: parent.verticalCenter }
                 Repeater { model: root.appDefs
                     delegate: Rectangle { required property var modelData
                         property var w: root.win(modelData.id)
-                        width: 44; height: 44; radius: 11; color: modelData.tint; opacity: pa.containsMouse ? 1 : 0.92
-                        scale: pa.containsMouse ? 1.12 : 1
-                        Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
-                        Text { anchors.centerIn: parent; text: modelData.glyph; color: "#ffffff"; font.pixelSize: 20 }
-                        Rectangle { visible: w.visible; width: 4; height: 4; radius: 2; color: Theme.text; anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.bottom; anchors.topMargin: 3 }
+                        property string auraType: "app_icon"
+                        property var auraData: ({ app: modelData.id, title: modelData.title })
+                        width: 48; height: 48; radius: 14
+                        gradient: Gradient { GradientStop { position: 0; color: Qt.lighter(modelData.tint, 1.25) } GradientStop { position: 1; color: modelData.tint } }
+                        scale: pa.containsMouse ? 1.16 : 1
+                        transformOrigin: Item.Bottom
+                        Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                        Text { anchors.centerIn: parent; text: modelData.glyph; color: "#ffffff"; font.pixelSize: 22 }
+                        Rectangle { visible: w.visible; width: 5; height: 5; radius: 2.5; color: Theme.text; anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.bottom; anchors.topMargin: 4 }
                         MouseArea { id: pa; anchors.fill: parent; hoverEnabled: true; acceptedButtons: Qt.LeftButton; onClicked: root.openApp(modelData.id) } } }
-                Rectangle { width: 1; height: 28; color: Theme.border; anchors.verticalCenter: parent.verticalCenter }
-                Text { anchors.verticalCenter: parent.verticalCenter; font.pixelSize: 11; font.family: Theme.family; color: Theme.dim
-                       text: "Guidance L" + aura.guidanceInfo.level + " · " + aura.guidanceInfo.name }
-                Text { id: clock; anchors.verticalCenter: parent.verticalCenter; font.pixelSize: 13; color: Theme.text; font.family: Theme.family
-                       text: Qt.formatTime(new Date(), "hh:mm")
-                       Timer { interval: 15000; running: true; repeat: true; onTriggered: clock.text = Qt.formatTime(new Date(), "hh:mm") } }
             }
         }
 
@@ -190,12 +268,29 @@ Window {
             if (aura.gesture.active && aura.gesture.mode === "menu") aura.closeMenu()
             if (m.button !== Qt.RightButton) return
             var c = root.contextAt(m.x, m.y)
+            if (c.type === "window_control") { root.wg = { app: c.data.app, x: m.x, y: m.y, act: "" }; return }
             aura.beginGesture(c.type, c.data, m.x, m.y)
         }
-        onPositionChanged: (m) => { if (pressed) aura.moveGesture(m.x, m.y) }
-        onReleased: (m) => { if (m.button === Qt.RightButton) aura.endGesture(m.x, m.y) }
-        onCanceled: aura.cancelGesture()
+        onPositionChanged: (m) => {
+            if (!pressed) return
+            if (root.wg) root.wg = { app: root.wg.app, x: root.wg.x, y: root.wg.y, act: root.wgAction(m.x - root.wg.x, m.y - root.wg.y) }
+            else aura.moveGesture(m.x, m.y)
+        }
+        onReleased: (m) => {
+            if (m.button !== Qt.RightButton) return
+            if (root.wg) root.wgFinish(); else aura.endGesture(m.x, m.y)
+        }
+        onCanceled: { root.wg = null; aura.cancelGesture() }
     }
+    Rectangle {  // live hint for the window control gesture
+        z: 200002; visible: root.wg !== null
+        x: root.wg ? Math.max(8, Math.min(root.width - width - 8, root.wg.x - width / 2)) : 0
+        y: root.wg ? root.wg.y + 22 : 0
+        width: hintTxt.implicitWidth + 28; height: 34; radius: 17
+        color: Theme.glassLight; border.width: 1; border.color: root.wg && root.wg.act ? Theme.accent : Theme.border
+        Text { id: hintTxt; anchors.centerIn: parent; text: root.wgLabel(root.wg ? root.wg.act : ""); color: Theme.text; font.pixelSize: 13; font.family: Theme.family; font.weight: Font.DemiBold }
+    }
+    Shortcut { sequence: "Escape"; enabled: root.wg !== null; onActivated: root.wg = null }
     GestureOverlay { id: gestureOverlay; z: 200001 }
     Shortcut { sequence: "Escape"; enabled: aura.gesture.active; onActivated: aura.cancelGesture() }
     Shortcut { sequence: "Escape"; enabled: !aura.gesture.active && root.launcherOpen; onActivated: root.launcherOpen = false }

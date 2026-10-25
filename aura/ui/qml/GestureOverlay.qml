@@ -20,7 +20,7 @@ Item {
         onPaint: {
             var c = getContext("2d"); c.reset()
             if (!ov.gestureMode || !g.points || g.points.length < 2) return
-            var col = g.invalid ? "#ff6b81" : (g.ready ? "#4ad7c1" : "#7c9cff")
+            var col = g.invalid ? "#ff5d7a" : (g.ready ? "#3de0b0" : "#8b7bff")
             c.lineCap = "round"; c.lineJoin = "round"
             c.strokeStyle = col; c.globalAlpha = 0.18; c.lineWidth = 14
             trace(c)
@@ -61,7 +61,7 @@ Item {
             radius: height > 40 ? 16 : height / 2
             x: g.node.x + modelData.dx * (ring + (width / 2)) - width / 2
             y: g.node.y + modelData.dy * (ring + (height / 2)) - height / 2
-            color: modelData.highlight ? Qt.rgba(fam.r * 0.5 + 0.05, fam.g * 0.5 + 0.05, fam.b * 0.5 + 0.08, 0.97) : Qt.rgba(0.08, 0.1, 0.16, 0.96)
+            color: modelData.highlight ? Qt.rgba(fam.r * 0.5 + 0.05, fam.g * 0.5 + 0.05, fam.b * 0.5 + 0.08, 0.97) : Qt.rgba(0.1, 0.09, 0.18, 0.96)
             border.width: modelData.highlight ? 2.5 : (modelData.recommended ? 2 : 1 + modelData.familiarity * 0.4)
             border.color: !modelData.available ? Qt.rgba(1, 1, 1, 0.12) : (modelData.highlight || modelData.recommended ? fam : Qt.rgba(1, 1, 1, 0.12 + 0.1 * modelData.familiarity))
             opacity: modelData.available ? 1.0 : 0.6
